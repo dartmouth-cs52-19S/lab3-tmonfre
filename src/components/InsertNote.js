@@ -23,6 +23,7 @@ export default class InsertNote extends React.Component {
 	render() {
 		return (
 			<div id="new-note-area">
+				<h3>add note:</h3>
 				<input id="new-note-input" type="text" value={this.state.title} onChange={this.onInputChange} onClick={this.selectText} />
 				<button onClick={this.onAddNoteClick} type="submit">Add Note</button>
 			</div>

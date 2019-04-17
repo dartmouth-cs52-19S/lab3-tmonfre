@@ -6,10 +6,10 @@ body, html {
 #new-note-area {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
+    margin-top: 20px;
 
     input {
-        width: 100%;
+        width: 85%;
         margin-left: 15px;
         margin-right: 25px;
         height: 30px;
@@ -25,6 +25,14 @@ body, html {
         margin-right: 25px;
         font-size: 14px;
         background-color: lightgrey;
+    }
+
+    h3 {
+        // fixed width column adopted from: https://stackoverflow.com/questions/29885284/how-to-set-a-fixed-width-column-with-css-flexbox/29885495
+        flex: 0 0 80px;
+        margin: 0;
+        margin-top: 8px;
+        margin-left: 5px;
     }
 }
 
