@@ -26,7 +26,7 @@ export default class Note extends React.Component {
 					position={this.state.position}
 					onDrag={this.onDrag}
 				>
-					<div className="note" style={{ zIndex: this.state.zIndex }}>
+					<div className="note" style={{ zIndex: this.state.zIndex }} onClick={this.onNoteClick} role="button" tabIndex={0}>
 						<div className="title-bar">
 							<textarea name="message" rows="1" cols="28" value={this.state.editTitle} onChange={this.updateEditTitle} />
 							<div className="icons">
@@ -48,10 +48,10 @@ export default class Note extends React.Component {
 				<Draggable
 					handle=".title-bar"
 					position={this.state.position}
-					onStart={this.onStartDrag}
+					onStart={this.onNoteClick}
 					onDrag={this.onDrag}
 				>
-					<div className="note" style={{ zIndex: this.state.zIndex }}>
+					<div className="note" style={{ zIndex: this.state.zIndex }} onClick={this.onNoteClick} role="button" tabIndex={0}>
 						<div className="title-bar">
 							<p>{this.props.note.title}</p>
 							<div className="icons">
@@ -108,7 +108,7 @@ export default class Note extends React.Component {
 		this.props.deleteNote(this.props.note.id);
 	}
 
-	onStartDrag = () => {
+	onNoteClick = () => {
 		// move the note to the top when the user drags/moves it
 		this.setState({
 			zIndex: this.props.getZIndex(),

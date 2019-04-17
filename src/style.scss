@@ -3,6 +3,31 @@ body, html {
     height: 100%;
 }
 
+#new-note-area {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+
+    input {
+        width: 100%;
+        margin-left: 15px;
+        margin-right: 25px;
+        height: 30px;
+        font-size: 20px;
+        border: 1px solid grey;
+        padding: 2px 5px;
+    }
+
+    button {
+        // fixed width column adopted from: https://stackoverflow.com/questions/29885284/how-to-set-a-fixed-width-column-with-css-flexbox/29885495
+        flex: 0 0 80px;
+
+        margin-right: 25px;
+        font-size: 14px;
+        background-color: lightgrey;
+    }
+}
+
 #notes-area {
     position: absolute;
 }
@@ -13,6 +38,10 @@ body, html {
     margin: 25px;
     position: absolute;
     background-color: white;
+}
+
+.note:focus {
+    outline: none;
 }
 
 .title-bar {

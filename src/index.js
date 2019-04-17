@@ -60,7 +60,7 @@ class App extends React.Component {
 			id,
 			x: Math.floor(Math.random() * Math.floor(window.innerWidth / 4)),
 			y: Math.floor(Math.random() * Math.floor(window.innerHeight / 4)),
-			zIndex: 0,
+			zIndex: this.getZIndex(),
 		};
 
 		this.setState(prevState => ({
