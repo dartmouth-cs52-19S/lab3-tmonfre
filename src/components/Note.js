@@ -14,6 +14,7 @@ export default class Note extends React.Component {
 			isEditing: false,
 			editTitle: this.props.note.title,
 			editText: this.props.note.text,
+			zIndex: this.props.note.zIndex,
 		};
 	}
 
@@ -25,7 +26,7 @@ export default class Note extends React.Component {
 					position={this.state.position}
 					onDrag={this.onDrag}
 				>
-					<div className="note" style={{ zIndex: this.props.note.zIndex }}>
+					<div className="note" style={{ zIndex: this.state.zIndex }}>
 						<div className="title-bar">
 							<textarea name="message" rows="1" cols="28" value={this.state.editTitle} onChange={this.updateEditTitle} />
 							<div className="icons">
@@ -47,9 +48,10 @@ export default class Note extends React.Component {
 				<Draggable
 					handle=".title-bar"
 					position={this.state.position}
+					onStart={this.onStartDrag}
 					onDrag={this.onDrag}
 				>
-					<div className="note" style={{ zIndex: this.props.note.zIndex }}>
+					<div className="note" style={{ zIndex: this.state.zIndex }}>
 						<div className="title-bar">
 							<p>{this.props.note.title}</p>
 							<div className="icons">
@@ -68,6 +70,16 @@ export default class Note extends React.Component {
 
 	onEditClick = () => {
 		const { isEditing } = this.state;
+
+		// clear out changes if they didn't want to save
+		if (isEditing) {
+			this.setState({
+				editTitle: this.props.note.title,
+				editText: this.props.note.text,
+			});
+		}
+
+		// go into editing mode either way
 		this.setState({
 			isEditing: !isEditing,
 		});
@@ -94,6 +106,13 @@ export default class Note extends React.Component {
 
 	onDeleteClick = () => {
 		this.props.deleteNote(this.props.note.id);
+	}
+
+	onStartDrag = () => {
+		// move the note to the top when the user drags/moves it
+		this.setState({
+			zIndex: this.props.getZIndex(),
+		});
 	}
 
 	onDrag = (e, ui) => {

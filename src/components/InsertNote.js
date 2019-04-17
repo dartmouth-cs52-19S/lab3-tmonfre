@@ -9,7 +9,7 @@ export default class InsertNote extends React.Component {
 		};
 	}
 
-	// if user presses enter in input field, select button
+	// if user presses enter in input field, add the note as if they pressed the button
 	// adapted from: https://www.w3schools.com/howto/howto_js_trigger_button_enter.asp
 	componentDidMount() {
 		document.getElementById('new-note-input').addEventListener('keyup', (event) => {

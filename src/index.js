@@ -12,12 +12,13 @@ class App extends React.Component {
 		this.state = {
 			notes: new Map(),
 			currentID: 0,
+			maxZIndex: 10000,
 		};
 	}
 
 	// TEMP: build some basic notes
 	componentDidMount() {
-		for (let i = 0; i < 2; i += 1) {
+		for (let i = 0; i < 5; i += 1) {
 			const note = {
 				title: `note asdfasda #${i}`,
 				text: 'my note text goes here! and I can add lots and lots and lots to this ![](http://i.giphy.com/gyRWkLSQVqlPi.gif)',
@@ -47,7 +48,7 @@ class App extends React.Component {
 
 	displayNotes = () => {
 		return this.state.notes.entrySeq().map(([id, note]) => {
-			return <Note key={id} id={id} note={note} deleteNote={this.deleteNote} updateText={this.updateText} />;
+			return <Note key={id} id={id} note={note} deleteNote={this.deleteNote} updateText={this.updateText} getZIndex={this.getZIndex} />;
 		});
 	}
 
@@ -79,6 +80,15 @@ class App extends React.Component {
 		this.setState(prevState => ({
 			notes: prevState.notes.update(id, (n) => { return Object.assign({}, n, fields); }),
 		}));
+	}
+
+	getZIndex = () => {
+		const { maxZIndex } = this.state;
+		this.setState({
+			maxZIndex: maxZIndex + 1,
+		});
+
+		return maxZIndex;
 	}
 }
 
