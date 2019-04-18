@@ -5,34 +5,45 @@ import InsertNote from './components/InsertNote';
 import Note from './components/Note';
 import './style.scss';
 
+import * as db from './services/datastore';
+
 class App extends React.Component {
 	constructor(props) {
 		super(props);
 
 		this.state = {
 			notes: new Map(),
-			currentID: 0,
-			maxZIndex: 10000,
+			maxZIndex: 0,
 		};
 	}
 
-	// TEMP: build some basic notes
+	// grab notes from firebase and store in state
 	componentDidMount() {
-		for (let i = 0; i < 5; i += 1) {
-			const note = {
-				title: `note asdfasda #${i}`,
-				text: 'my note text goes here! and I can add lots and lots and lots to this ![](http://i.giphy.com/gyRWkLSQVqlPi.gif)',
-				id: i,
-				x: Math.floor(Math.random() * Math.floor(window.innerWidth) / 4),
-				y: Math.floor(Math.random() * Math.floor(window.innerHeight / 4)),
-				zIndex: 0,
-			};
+		db.fetchNotes((notes) => {
+			// clear map
+			this.setState({
+				notes: new Map(),
+			}, () => {
+				// maximum zIndex in the collection
+				let max = this.state.maxZIndex;
 
-			this.setState(prevState => ({
-				notes: prevState.notes.set(i, note),
-				currentID: i + 1,
-			}));
-		}
+				// add each note to map
+				Object.keys(notes).forEach((key) => {
+					// determine if we've found a higher zIndex
+					if (notes[key].zIndex > max) { max = notes[key].zIndex; }
+
+					// store the note
+					this.setState(prevState => ({
+						notes: prevState.notes.set(key, notes[key]),
+					}));
+				});
+
+				// update the max zIndex for bring to front
+				this.setState({
+					maxZIndex: max,
+				});
+			});
+		});
 	}
 
 	render() {
@@ -46,49 +57,38 @@ class App extends React.Component {
 		);
 	}
 
+	// construct Note objects
 	displayNotes = () => {
 		return this.state.notes.entrySeq().map(([id, note]) => {
-			return <Note key={id} id={id} note={note} deleteNote={this.deleteNote} updateText={this.updateText} getZIndex={this.getZIndex} />;
+			return <Note key={id} id={id} note={note} deleteNote={db.deleteNote} updateNoteContent={db.updateNoteContent} updateNotePosition={db.updateNotePosition} getZIndex={this.getZIndex} />;
 		});
 	}
 
+	// add a note to the screen (currently does not add to firebase)
 	addNote = (title, text = '') => {
-		const id = this.state.currentID + 1;
 		const note = {
 			title,
 			text,
-			id,
+			id: Math.random().toString(36).substring(7), // random string adapted from: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
 			x: Math.floor(Math.random() * Math.floor(window.innerWidth / 4)),
 			y: Math.floor(Math.random() * Math.floor(window.innerHeight / 4)),
-			zIndex: this.getZIndex(),
+			zIndex: this.getZIndex(this.state.maxZIndex),
 		};
 
-		this.setState(prevState => ({
-			notes: prevState.notes.set(id, note),
-			currentID: id,
-		}));
+		db.addNote(note);
 	}
 
-	deleteNote = (id) => {
-		this.setState(prevState => ({
-			notes: prevState.notes.delete(id),
-		}));
-	}
-
-	updateText = (id, text, title) => {
-		const fields = { text, title };
-		this.setState(prevState => ({
-			notes: prevState.notes.update(id, (n) => { return Object.assign({}, n, fields); }),
-		}));
-	}
-
-	getZIndex = () => {
-		const { maxZIndex } = this.state;
-		this.setState({
-			maxZIndex: maxZIndex + 1,
-		});
-
-		return maxZIndex;
+	// returns a new z index integer that places the attached note above all others
+	getZIndex = (curr) => {
+		if (curr <= this.state.maxZIndex) {
+			const { maxZIndex } = this.state;
+			this.setState({
+				maxZIndex: maxZIndex + 1,
+			});
+			return maxZIndex + 1;
+		} else {
+			return curr;
+		}
 	}
 }
 

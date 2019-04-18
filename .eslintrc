@@ -43,7 +43,8 @@
             "render",
             "everything-else"
           ]}],
-        "react/jsx-indent-props": [2, "tab"]
+        "react/jsx-indent-props": [2, "tab"],
+        "react/no-access-state-in-setstate": 0
     },
     "plugins": [
         "react"

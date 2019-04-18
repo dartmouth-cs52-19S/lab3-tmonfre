@@ -22,11 +22,11 @@ export default class Note extends React.Component {
 		if (this.state.isEditing) {
 			return (
 				<Draggable
-					handle=".fa-arrows-alt"
+					handle=".title-bar p"
 					position={this.state.position}
 					onDrag={this.onDrag}
 				>
-					<div className="note" style={{ zIndex: this.state.zIndex }} onClick={this.onNoteClick} role="button" tabIndex={0}>
+					<div className="note" style={{ zIndex: this.state.zIndex }}>
 						<div className="title-bar">
 							<textarea name="message" rows="1" cols="28" value={this.state.editTitle} onChange={this.updateEditTitle} />
 							<div className="icons">
@@ -46,10 +46,10 @@ export default class Note extends React.Component {
 		} else {
 			return (
 				<Draggable
-					handle=".title-bar"
+					handle=".title-bar p"
 					position={this.state.position}
-					onStart={this.onNoteClick}
 					onDrag={this.onDrag}
+					onStop={this.onStopDrag}
 				>
 					<div className="note" style={{ zIndex: this.state.zIndex }} onClick={this.onNoteClick} role="button" tabIndex={0}>
 						<div className="title-bar">
@@ -62,7 +62,6 @@ export default class Note extends React.Component {
 						<div className="bar" />
 						<div className="note-content" dangerouslySetInnerHTML={{ __html: marked(this.props.note.text || '') }} />
 					</div>
-
 				</Draggable>
 			);
 		}
@@ -86,7 +85,7 @@ export default class Note extends React.Component {
 	}
 
 	onSubmitEditClick = () => {
-		this.props.updateText(this.props.note.id, this.state.editText, this.state.editTitle);
+		this.props.updateNoteContent(this.props.note.id, this.state.editText, this.state.editTitle);
 		this.setState({
 			isEditing: false,
 		});
@@ -108,11 +107,15 @@ export default class Note extends React.Component {
 		this.props.deleteNote(this.props.note.id);
 	}
 
+	// move the note to the top when the user drags/moves it
 	onNoteClick = () => {
-		// move the note to the top when the user drags/moves it
 		this.setState({
-			zIndex: this.props.getZIndex(),
+			zIndex: this.props.getZIndex(this.state.zIndex),
 		});
+	}
+
+	onStart = (e, ui) => {
+		console.log('start');
 	}
 
 	onDrag = (e, ui) => {
@@ -124,5 +127,12 @@ export default class Note extends React.Component {
 				},
 			});
 		}
+	}
+
+	onStopDrag = (e, ui) => {
+		// wait for onDrag to finish
+		setTimeout(() => {
+			this.props.updateNotePosition(this.props.note.id, ui.lastX, ui.lastY, this.state.zIndex);
+		}, 0);
 	}
 }
