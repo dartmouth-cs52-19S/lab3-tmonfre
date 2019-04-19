@@ -57,19 +57,27 @@ class App extends React.Component {
 		);
 	}
 
-	// construct Note objects
+	// construct Note components
 	displayNotes = () => {
 		return this.state.notes.entrySeq().map(([id, note]) => {
-			return <Note key={id} id={id} note={note} deleteNote={db.deleteNote} updateNoteContent={db.updateNoteContent} updateNotePosition={db.updateNotePosition} getZIndex={this.getZIndex} />;
+			return (
+				<Note
+					key={id}
+					note={note}
+					deleteNote={db.deleteNote}
+					updateNoteContent={db.updateNoteContent}
+					updateNotePosition={db.updateNotePosition}
+					getTopZIndex={this.getTopZIndex}
+				/>
+			);
 		});
 	}
 
-	// add a note to the screen (currently does not add to firebase)
+	// add a note to the screen and pick random location in user view to start with
 	addNote = (title, text = '') => {
 		const note = {
 			title,
 			text,
-			id: Math.random().toString(36).substring(7), // random string adapted from: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
 			x: Math.floor(Math.random() * Math.floor(window.innerWidth / 4)),
 			y: Math.floor(Math.random() * Math.floor(window.innerHeight / 4)),
 			zIndex: this.getZIndex(this.state.maxZIndex),
@@ -79,7 +87,7 @@ class App extends React.Component {
 	}
 
 	// returns a new z index integer that places the attached note above all others
-	getZIndex = (curr) => {
+	getTopZIndex = (curr) => {
 		if (curr <= this.state.maxZIndex) {
 			const { maxZIndex } = this.state;
 			this.setState({

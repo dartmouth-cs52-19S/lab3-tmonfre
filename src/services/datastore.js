@@ -13,17 +13,25 @@ const config = {
 firebase.initializeApp(config);
 const database = firebase.database();
 
-// get all notes in the database
+// set up listeners for all notes in db -- call callback on change
 function fetchNotes(callback) {
 	database.ref('notes').on('value', (snapshot) => {
-		const newNoteState = snapshot.val();
-		callback(newNoteState);
+		callback(snapshot.val());
 	});
 }
 
 // add a new note to firebase
 function addNote(note) {
-	database.ref(`notes/${note.id}`).set(note);
+	// add the note and have firebase generate a unique id
+	database.ref('notes').push(note)
+		.then((added) => {
+			// add the unique id into the note so we can store it
+			database.ref(`notes/${added.key}`).update({
+				id: added.key,
+			});
+		}).catch((err) => {
+			console.error(err);
+		});
 }
 
 // remove a note from firebase

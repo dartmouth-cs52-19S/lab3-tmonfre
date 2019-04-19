@@ -19,6 +19,14 @@ export default class Note extends React.Component {
 	}
 
 	render() {
+		return (
+			<div>
+				{this.renderNote()}
+			</div>
+		);
+	}
+
+	renderNote() {
 		if (this.state.isEditing) {
 			return (
 				<Draggable
@@ -71,7 +79,7 @@ export default class Note extends React.Component {
 	onEditClick = () => {
 		const { isEditing } = this.state;
 
-		// clear out changes if they didn't want to save
+		// clear out changes if they didn't want to save (i.e. was editing and requested to stop)
 		if (isEditing) {
 			this.setState({
 				editTitle: this.props.note.title,
@@ -79,14 +87,15 @@ export default class Note extends React.Component {
 			});
 		}
 
-		// go into editing mode either way
+		// swap editing states
 		this.setState({
 			isEditing: !isEditing,
 		});
 	}
 
+	// update note content and render note
 	onSubmitEditClick = () => {
-		this.props.updateNoteContent(this.props.note.id, this.state.editText, this.state.editTitle);
+		this.props.updateNoteContent(this.props.note.key, this.state.editText, this.state.editTitle);
 		this.setState({
 			isEditing: false,
 		});
@@ -105,16 +114,17 @@ export default class Note extends React.Component {
 	}
 
 	onDeleteClick = () => {
-		this.props.deleteNote(this.props.note.id);
+		this.props.deleteNote(this.props.note.key);
 	}
 
 	// move the note to the top when the user drags/moves it
 	onStartDrag = (e, ui) => {
 		this.setState({
-			zIndex: this.props.getZIndex(this.state.zIndex),
+			zIndex: this.props.getTopZIndex(this.state.zIndex),
 		});
 	}
 
+	// update local position as the user drags, but don't propogate to firebase (in case poor network connection)
 	onDrag = (e, ui) => {
 		if (ui.lastX >= 0 && ui.lastX <= window.innerWidth && ui.lastY >= 0 && ui.lastY <= window.innerHeight) {
 			this.setState({
@@ -126,9 +136,10 @@ export default class Note extends React.Component {
 		}
 	}
 
+	// when user chooses a final location, update the note's position in firebase (one time)
 	onStopDrag = (e, ui) => {
 		setTimeout(() => {
-			this.props.updateNotePosition(this.props.note.id, ui.lastX, ui.lastY, this.state.zIndex);
+			this.props.updateNotePosition(this.props.note.key, ui.lastX, ui.lastY, this.state.zIndex);
 		}, 0);
 	}
 }
