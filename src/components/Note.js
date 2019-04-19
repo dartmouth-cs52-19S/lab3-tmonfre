@@ -48,6 +48,7 @@ export default class Note extends React.Component {
 				<Draggable
 					handle=".title-bar p"
 					position={this.state.position}
+					onStart={this.onStartDrag}
 					onDrag={this.onDrag}
 					onStop={this.onStopDrag}
 				>
@@ -108,7 +109,7 @@ export default class Note extends React.Component {
 	}
 
 	// move the note to the top when the user drags/moves it
-	onNoteClick = () => {
+	onStartDrag = (e, ui) => {
 		this.setState({
 			zIndex: this.props.getZIndex(this.state.zIndex),
 		});
