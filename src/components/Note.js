@@ -114,10 +114,6 @@ export default class Note extends React.Component {
 		});
 	}
 
-	onStart = (e, ui) => {
-		console.log('start');
-	}
-
 	onDrag = (e, ui) => {
 		if (ui.lastX >= 0 && ui.lastX <= window.innerWidth && ui.lastY >= 0 && ui.lastY <= window.innerHeight) {
 			this.setState({
@@ -130,7 +126,6 @@ export default class Note extends React.Component {
 	}
 
 	onStopDrag = (e, ui) => {
-		// wait for onDrag to finish
 		setTimeout(() => {
 			this.props.updateNotePosition(this.props.note.id, ui.lastX, ui.lastY, this.state.zIndex);
 		}, 0);

@@ -28,7 +28,7 @@ function addNote(note) {
 
 // remove a note from firebase
 function deleteNote(id) {
-	firebase.database().ref('notes').child(id).remove();
+	firebase.database().ref(`notes/${id}`).remove();
 }
 
 // update the title and text of a note in firebase
