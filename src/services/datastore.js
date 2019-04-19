@@ -13,10 +13,11 @@ const config = {
 firebase.initializeApp(config);
 const database = firebase.database();
 
-// set up listeners for all notes in db -- call callback on change
+// get all notes in the database
 function fetchNotes(callback) {
 	database.ref('notes').on('value', (snapshot) => {
-		callback(snapshot.val());
+		const newNoteState = snapshot.val();
+		callback(newNoteState);
 	});
 }
 
@@ -55,6 +56,37 @@ function updateNotePosition(id, x, y, zIndex) {
 	});
 }
 
+// if the user chose to press undo, update the location of the notes in firebase
+function resetNotes(notesToSet) {
+	notesToSet.entrySeq().forEach(([id, note]) => {
+		database.ref(`notes/${id}`).set(note);
+	});
+}
+
+function signUp(email, password) {
+	firebase.auth().createUserWithEmailAndPassword(email, password)
+		.then(() => {
+			return firebase.auth().currentUser;
+		})
+		.catch((error) => {
+			return error;
+		});
+}
+
+function signIn(email, password) {
+	firebase.auth().signInWithEmailAndPassword(email, password)
+		.then(() => {
+			return firebase.auth().currentUser;
+		})
+		.catch((error) => {
+			return error;
+		});
+}
+
+function getCurrentUser() {
+	return firebase.auth().currentUser;
+}
+
 export {
-	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition,
+	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition, resetNotes, signIn, signUp, getCurrentUser,
 };

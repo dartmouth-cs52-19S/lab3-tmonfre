@@ -139,7 +139,7 @@ export default class Note extends React.Component {
 	// when user chooses a final location, update the note's position in firebase (one time)
 	onStopDrag = (e, ui) => {
 		setTimeout(() => {
-			this.props.updateNotePosition(this.props.note.key, ui.lastX, ui.lastY, this.state.zIndex);
+			this.props.updateNotePosition(this.props.note.id, ui.lastX, ui.lastY, this.state.zIndex);
 		}, 0);
 	}
 }

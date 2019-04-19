@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Map } from 'immutable';
+import { Map, Stack } from 'immutable';
 import InsertNote from './components/InsertNote';
 import Note from './components/Note';
+import User from './components/User';
 import './style.scss';
 
 import * as db from './services/datastore';
@@ -13,6 +14,7 @@ class App extends React.Component {
 
 		this.state = {
 			notes: new Map(),
+			undoStack: new Stack(),
 			maxZIndex: 0,
 		};
 	}
@@ -20,8 +22,9 @@ class App extends React.Component {
 	// grab notes from firebase and store in state
 	componentDidMount() {
 		db.fetchNotes((notes) => {
-			// clear map
+			// push old state to stack and clear notes
 			this.setState({
+				undoStack: this.state.undoStack.push(this.state),
 				notes: new Map(),
 			}, () => {
 				// maximum zIndex in the collection
@@ -49,7 +52,8 @@ class App extends React.Component {
 	render() {
 		return (
 			<div>
-				<InsertNote addNote={this.addNote} />
+				<User user={db.getCurrentUser()} signIn={this.signIn} />
+				<InsertNote addNote={this.addNote} undoChanges={this.undoChanges} />
 				<div id="notes-area">
 					{this.displayNotes()}
 				</div>
@@ -71,6 +75,25 @@ class App extends React.Component {
 				/>
 			);
 		});
+	}
+
+	signIn = () => {
+		console.log('sign in');
+	}
+
+	// pop from the stack, and return user to previous state
+	undoChanges = () => {
+		const prevState = this.state.undoStack.pop();
+
+		// as long as there is something to pop
+		if (prevState._head) {
+			// update the stack then reset the notes in firebase
+			this.setState({
+				undoStack: prevState._head.value.undoStack,
+			}, () => {
+				db.resetNotes(prevState._head.value.notes);
+			});
+		}
 	}
 
 	// add a note to the screen and pick random location in user view to start with

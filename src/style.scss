@@ -3,6 +3,25 @@ body, html {
     height: 100%;
 }
 
+#user-area {
+    margin-left: 5px;
+    margin-bottom: 8px;
+
+    #sign-in {
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    #sign-in:hover {
+        color: #4286f4;
+        cursor: pointer;
+    }
+
+    #sign-in:focus {
+        outline: none;
+    }
+}
+
 #new-note-area {
     display: flex;
     justify-content: space-between;
@@ -33,6 +52,17 @@ body, html {
         margin: 0;
         margin-top: 8px;
         margin-left: 5px;
+    }
+
+    i {
+        margin-top: 8px;
+        margin-right: 20px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    i:focus {
+        outline: none;
     }
 }
 
