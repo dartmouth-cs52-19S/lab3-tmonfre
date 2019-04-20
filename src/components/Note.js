@@ -27,51 +27,104 @@ export default class Note extends React.Component {
 	}
 
 	renderNote() {
-		if (this.state.isEditing) {
-			return (
-				<Draggable
-					handle=".title-bar p"
-					position={this.state.position}
-					onDrag={this.onDrag}
-				>
-					<div className="note" style={{ zIndex: this.state.zIndex }}>
-						<div className="title-bar">
-							<textarea name="message" rows="1" cols="28" value={this.state.editTitle} onChange={this.updateEditTitle} />
-							<div className="icons">
-								<i className="fas fa-edit" onClick={this.onEditClick} role="button" tabIndex={0} />
-								<i className="fas fa-trash" onClick={this.onDeleteClick} role="button" tabIndex={0} />
+		if (this.props.user) {
+			if (this.props.user.uid === this.props.note.userID) {
+				if (this.state.isEditing) {
+					return (
+						<Draggable
+							handle=".title-bar p"
+							position={this.state.position}
+							onDrag={this.onDrag}
+						>
+							<div className="note" style={{ zIndex: this.state.zIndex }}>
+								<div className="title-bar">
+									<textarea name="message" rows="1" cols="28" value={this.state.editTitle} onChange={this.updateEditTitle} />
+									<div className="icons">
+										{this.renderIcons()}
+									</div>
+								</div>
+								<div className="bar" />
+								<div className="note-content editing">
+									<textarea name="message" rows="20" cols="30" value={this.state.editText} onChange={this.updateEditText} />
+									<br />
+									<input type="submit" onClick={this.onSubmitEditClick} />
+								</div>
 							</div>
+						</Draggable>
+					);
+				} else {
+					return (
+						<Draggable
+							handle=".title-bar p"
+							position={this.state.position}
+							onStart={this.onStartDrag}
+							onDrag={this.onDrag}
+							onStop={this.onStopDrag}
+						>
+							<div className="note" style={{ zIndex: this.state.zIndex }} onClick={this.onNoteClick} role="button" tabIndex={0}>
+								<div className="title-bar">
+									<p>{this.props.note.title}</p>
+									<div className="icons">
+										{this.renderIcons()}
+									</div>
+								</div>
+								<div className="bar" />
+								<div className="note-content" dangerouslySetInnerHTML={{ __html: marked(this.props.note.text || '') }} />
+							</div>
+						</Draggable>
+					);
+				}
+			} else {
+				return (
+					<Draggable disabled position={this.state.position}>
+						<div className="note" style={{ zIndex: this.state.zIndex }} onClick={this.onNoteClick} role="button" tabIndex={0}>
+							<div className="title-bar">
+								<p>{this.props.note.title}</p>
+								<div className="icons">
+									{this.renderIcons()}
+								</div>
+							</div>
+							<div className="bar" />
+							<div className="note-content" dangerouslySetInnerHTML={{ __html: marked(this.props.note.text || '') }} />
 						</div>
-						<div className="bar" />
-						<div className="note-content editing">
-							<textarea name="message" rows="20" cols="30" value={this.state.editText} onChange={this.updateEditText} />
-							<br />
-							<input type="submit" onClick={this.onSubmitEditClick} />
-						</div>
-					</div>
-				</Draggable>
-			);
+					</Draggable>
+				);
+			}
 		} else {
 			return (
-				<Draggable
-					handle=".title-bar p"
-					position={this.state.position}
-					onStart={this.onStartDrag}
-					onDrag={this.onDrag}
-					onStop={this.onStopDrag}
-				>
+				<Draggable disabled position={this.state.position}>
 					<div className="note" style={{ zIndex: this.state.zIndex }} onClick={this.onNoteClick} role="button" tabIndex={0}>
 						<div className="title-bar">
 							<p>{this.props.note.title}</p>
 							<div className="icons">
-								<i className="fas fa-edit" onClick={this.onEditClick} role="button" tabIndex={0} />
-								<i className="fas fa-trash" onClick={this.onDeleteClick} role="button" tabIndex={0} />
+								{this.renderIcons()}
 							</div>
 						</div>
 						<div className="bar" />
 						<div className="note-content" dangerouslySetInnerHTML={{ __html: marked(this.props.note.text || '') }} />
 					</div>
 				</Draggable>
+			);
+		}
+	}
+
+	renderIcons() {
+		if (this.props.user) {
+			if (this.props.user.uid === this.props.note.userID) {
+				return (
+					<div>
+						<i className="fas fa-edit" onClick={this.onEditClick} role="button" tabIndex={0} />
+						<i className="fas fa-trash" onClick={this.onDeleteClick} role="button" tabIndex={0} />
+					</div>
+				);
+			} else {
+				return (
+					<i className="fas fa-lock" />
+				);
+			}
+		} else {
+			return (
+				<i className="fas fa-lock" />
 			);
 		}
 	}
@@ -95,7 +148,7 @@ export default class Note extends React.Component {
 
 	// update note content and render note
 	onSubmitEditClick = () => {
-		this.props.updateNoteContent(this.props.note.key, this.state.editText, this.state.editTitle);
+		this.props.updateNoteContent(this.props.note.id, this.state.editText, this.state.editTitle);
 		this.setState({
 			isEditing: false,
 		});
@@ -114,7 +167,7 @@ export default class Note extends React.Component {
 	}
 
 	onDeleteClick = () => {
-		this.props.deleteNote(this.props.note.key);
+		this.props.deleteNote(this.props.note.id);
 	}
 
 	// move the note to the top when the user drags/moves it

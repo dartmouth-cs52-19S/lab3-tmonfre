@@ -77,6 +77,8 @@ body, html {
     }
 }
 
+
+
 #new-note-area {
     display: flex;
     justify-content: space-between;
@@ -161,6 +163,7 @@ body, html {
 .icons {
     width: 45px;
     flex: 0 0 auto;
+    text-align: right;
 
     i {
         margin-left: 3px;
