@@ -4,6 +4,7 @@ import { Map, Stack } from 'immutable';
 import InsertNote from './components/InsertNote';
 import Note from './components/Note';
 import User from './components/User';
+import SignIn from './components/SignIn';
 import './style.scss';
 
 import * as db from './services/datastore';
@@ -16,6 +17,7 @@ class App extends React.Component {
 			notes: new Map(),
 			undoStack: new Stack(),
 			maxZIndex: 0,
+			signIn: !!db.getCurrentUser(),
 		};
 	}
 
@@ -52,8 +54,11 @@ class App extends React.Component {
 	render() {
 		return (
 			<div>
-				<User user={db.getCurrentUser()} signIn={this.signIn} />
-				<InsertNote addNote={this.addNote} undoChanges={this.undoChanges} />
+				<div id="user-area">
+					{this.state.signIn ? <SignIn closeModal={this.requestSignIn} /> : null}
+					<User user={db.getCurrentUser()} signIn={this.requestSignIn} signOut={this.requestSignOut} />
+				</div>
+				{db.getCurrentUser() ? <InsertNote addNote={this.addNote} undoChanges={this.undoChanges} /> : null }
 				<div id="notes-area">
 					{this.displayNotes()}
 				</div>
@@ -77,8 +82,19 @@ class App extends React.Component {
 		});
 	}
 
-	signIn = () => {
-		console.log('sign in');
+	requestSignIn = () => {
+		this.setState({
+			signIn: !this.state.signIn,
+		});
+	}
+
+	requestSignOut = () => {
+		db.signOut()
+			.then(() => {
+				this.setState({
+					signIn: false,
+				});
+			});
 	}
 
 	// pop from the stack, and return user to previous state
@@ -103,7 +119,7 @@ class App extends React.Component {
 			text,
 			x: Math.floor(Math.random() * Math.floor(window.innerWidth / 4)),
 			y: Math.floor(Math.random() * Math.floor(window.innerHeight / 4)),
-			zIndex: this.getZIndex(this.state.maxZIndex),
+			zIndex: this.getTopZIndex(this.state.maxZIndex),
 		};
 
 		db.addNote(note);

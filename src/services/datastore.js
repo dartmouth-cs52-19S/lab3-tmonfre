@@ -74,19 +74,46 @@ function signUp(email, password) {
 }
 
 function signIn(email, password) {
-	firebase.auth().signInWithEmailAndPassword(email, password)
-		.then(() => {
-			return firebase.auth().currentUser;
-		})
-		.catch((error) => {
-			return error;
-		});
+	return new Promise((resolve, reject) => {
+		firebase.auth().signInWithEmailAndPassword(email, password)
+			.then(() => {
+				resolve();
+			})
+			.catch((error) => {
+				if (error.code === 'auth/user-not-found') {
+					firebase.auth().createUserWithEmailAndPassword(email, password)
+						.then(() => {
+							resolve();
+						})
+						.catch((err) => {
+							console.log(err);
+							reject();
+						});
+				} else {
+					console.log(error);
+					reject();
+				}
+			});
+	});
 }
 
 function getCurrentUser() {
 	return firebase.auth().currentUser;
 }
 
+// promise syntax adapted from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+function signOut() {
+	return new Promise((resolve, reject) => {
+		firebase.auth().signOut()
+			.then(() => {
+				resolve();
+			})
+			.catch(() => {
+				reject();
+			});
+	});
+}
+
 export {
-	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition, resetNotes, signIn, signUp, getCurrentUser,
+	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition, resetNotes, signIn, signUp, signOut, getCurrentUser,
 };
