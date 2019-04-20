@@ -17,7 +17,8 @@ class App extends React.Component {
 			notes: new Map(),
 			undoStack: new Stack(),
 			maxZIndex: 0,
-			signIn: !!db.getCurrentUser(),
+			signIn: false,
+			user: db.getCurrentUser(),
 		};
 	}
 
@@ -28,6 +29,7 @@ class App extends React.Component {
 			this.setState({
 				undoStack: this.state.undoStack.push(this.state),
 				notes: new Map(),
+				user: db.getCurrentUser(),
 			}, () => {
 				// maximum zIndex in the collection
 				let max = this.state.maxZIndex;
@@ -55,10 +57,10 @@ class App extends React.Component {
 		return (
 			<div>
 				<div id="user-area">
-					{this.state.signIn ? <SignIn closeModal={this.requestSignIn} /> : null}
-					<User user={db.getCurrentUser()} signIn={this.requestSignIn} signOut={this.requestSignOut} />
+					{this.state.signIn ? <SignIn closeModal={this.requestSignIn} setUser={this.setUser} /> : null}
+					<User user={this.state.user} setUser={this.setUser} signIn={this.requestSignIn} signOut={this.requestSignOut} />
 				</div>
-				{db.getCurrentUser() ? <InsertNote addNote={this.addNote} undoChanges={this.undoChanges} /> : null }
+				{this.state.user ? <InsertNote addNote={this.addNote} undoChanges={this.undoChanges} /> : null }
 				<div id="notes-area">
 					{this.displayNotes()}
 				</div>
@@ -77,9 +79,15 @@ class App extends React.Component {
 					updateNoteContent={db.updateNoteContent}
 					updateNotePosition={db.updateNotePosition}
 					getTopZIndex={this.getTopZIndex}
-					user={db.getCurrentUser()}
+					user={this.state.user}
 				/>
 			);
+		});
+	}
+
+	setUser = (user) => {
+		this.setState({
+			user,
 		});
 	}
 
@@ -93,6 +101,7 @@ class App extends React.Component {
 		db.signOut()
 			.then(() => {
 				this.setState({
+					user: null,
 					signIn: false,
 				});
 			});
@@ -121,7 +130,7 @@ class App extends React.Component {
 			x: Math.floor(Math.random() * Math.floor(window.innerWidth / 4)),
 			y: Math.floor(Math.random() * Math.floor(window.innerHeight / 4)),
 			zIndex: this.getTopZIndex(this.state.maxZIndex),
-			userID: db.getCurrentUser().uid,
+			userID: this.state.user.uid,
 		};
 
 		db.addNote(note);

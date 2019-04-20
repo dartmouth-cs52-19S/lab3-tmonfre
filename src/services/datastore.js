@@ -73,25 +73,35 @@ function signUp(email, password) {
 		});
 }
 
+// adopted from: https://firebase.google.com/docs/auth/web/google-signin
+function signInWithGoogle() {
+	return new Promise((resolve, reject) => {
+		const provider = new firebase.auth.GoogleAuthProvider();
+		firebase.auth().signInWithPopup(provider).then((result) => {
+			resolve(firebase.auth().currentUser);
+		}).catch((error) => {
+			reject(error);
+		});
+	});
+}
+
 function signIn(email, password) {
 	return new Promise((resolve, reject) => {
 		firebase.auth().signInWithEmailAndPassword(email, password)
 			.then(() => {
-				resolve();
+				resolve(firebase.auth().currentUser);
 			})
 			.catch((error) => {
 				if (error.code === 'auth/user-not-found') {
 					firebase.auth().createUserWithEmailAndPassword(email, password)
 						.then(() => {
-							resolve();
+							resolve(firebase.auth().currentUser);
 						})
 						.catch((err) => {
-							console.log(err);
-							reject();
+							reject(err);
 						});
 				} else {
-					console.log(error);
-					reject();
+					reject(error);
 				}
 			});
 	});
@@ -108,12 +118,12 @@ function signOut() {
 			.then(() => {
 				resolve();
 			})
-			.catch(() => {
-				reject();
+			.catch((error) => {
+				reject(error);
 			});
 	});
 }
 
 export {
-	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition, resetNotes, signIn, signUp, signOut, getCurrentUser,
+	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition, resetNotes, signIn, signUp, signOut, getCurrentUser, signInWithGoogle,
 };

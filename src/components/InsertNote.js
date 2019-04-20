@@ -12,10 +12,11 @@ export default class InsertNote extends React.Component {
 	render() {
 		return (
 			<div id="new-note-area">
-				<h3>add note:</h3>
-				<input id="new-note-input" type="text" value={this.state.title} onChange={this.onInputChange} onClick={this.selectText} onKeyUp={this.pressedEnter} />
-				<button onClick={this.onAddNoteClick} type="submit">Add Note</button>
-				<i className="fas fa-undo-alt" onClick={this.props.undoChanges} role="button" tabIndex={0} />
+				<input type="text" value={this.state.title} onChange={this.onInputChange} onClick={this.selectText} onKeyUp={this.pressedEnter} />
+				<div>
+					<button onClick={this.onAddNoteClick} type="submit">Add Note</button>
+					<i className="fas fa-undo-alt" onClick={this.props.undoChanges} role="button" tabIndex={0} />
+				</div>
 			</div>
 		);
 	}
