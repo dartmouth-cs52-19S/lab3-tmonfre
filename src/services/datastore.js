@@ -13,10 +13,11 @@ const config = {
 firebase.initializeApp(config);
 const database = firebase.database();
 
-// set up listeners for all notes in db -- call callback on change
+// get all notes in the database
 function fetchNotes(callback) {
 	database.ref('notes').on('value', (snapshot) => {
-		callback(snapshot.val());
+		const newNoteState = snapshot.val();
+		callback(newNoteState);
 	});
 }
 
@@ -55,6 +56,74 @@ function updateNotePosition(id, x, y, zIndex) {
 	});
 }
 
+// if the user chose to press undo, update the location of the notes in firebase
+function resetNotes(notesToSet) {
+	notesToSet.entrySeq().forEach(([id, note]) => {
+		database.ref(`notes/${id}`).set(note);
+	});
+}
+
+function signUp(email, password) {
+	firebase.auth().createUserWithEmailAndPassword(email, password)
+		.then(() => {
+			return firebase.auth().currentUser;
+		})
+		.catch((error) => {
+			return error;
+		});
+}
+
+// adopted from: https://firebase.google.com/docs/auth/web/google-signin
+function signInWithGoogle() {
+	return new Promise((resolve, reject) => {
+		const provider = new firebase.auth.GoogleAuthProvider();
+		firebase.auth().signInWithPopup(provider).then((result) => {
+			resolve(firebase.auth().currentUser);
+		}).catch((error) => {
+			reject(error);
+		});
+	});
+}
+
+function signIn(email, password) {
+	return new Promise((resolve, reject) => {
+		firebase.auth().signInWithEmailAndPassword(email, password)
+			.then(() => {
+				resolve(firebase.auth().currentUser);
+			})
+			.catch((error) => {
+				if (error.code === 'auth/user-not-found') {
+					firebase.auth().createUserWithEmailAndPassword(email, password)
+						.then(() => {
+							resolve(firebase.auth().currentUser);
+						})
+						.catch((err) => {
+							reject(err);
+						});
+				} else {
+					reject(error);
+				}
+			});
+	});
+}
+
+function getCurrentUser() {
+	return firebase.auth().currentUser;
+}
+
+// promise syntax adapted from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+function signOut() {
+	return new Promise((resolve, reject) => {
+		firebase.auth().signOut()
+			.then(() => {
+				resolve();
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+}
+
 export {
-	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition,
+	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition, resetNotes, signIn, signUp, signOut, getCurrentUser, signInWithGoogle,
 };

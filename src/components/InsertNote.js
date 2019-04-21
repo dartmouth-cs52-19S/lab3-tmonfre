@@ -9,23 +9,14 @@ export default class InsertNote extends React.Component {
 		};
 	}
 
-	// if user presses enter in input field, add the note as if they pressed the button
-	// adapted from: https://www.w3schools.com/howto/howto_js_trigger_button_enter.asp
-	componentDidMount() {
-		document.getElementById('new-note-input').addEventListener('keyup', (event) => {
-			if (event.keyCode === 13) {
-				event.preventDefault();
-				this.onAddNoteClick();
-			}
-		});
-	}
-
 	render() {
 		return (
 			<div id="new-note-area">
-				<h3>add note:</h3>
-				<input id="new-note-input" type="text" value={this.state.title} onChange={this.onInputChange} onClick={this.selectText} />
-				<button onClick={this.onAddNoteClick} type="submit">Add Note</button>
+				<input type="text" value={this.state.title} onChange={this.onInputChange} onClick={this.selectText} onKeyUp={this.pressedEnter} />
+				<div>
+					<button onClick={this.onAddNoteClick} type="submit">Add Note</button>
+					<i className="fas fa-undo-alt" onClick={this.props.undoChanges} role="button" tabIndex={0} />
+				</div>
 			</div>
 		);
 	}
@@ -45,5 +36,13 @@ export default class InsertNote extends React.Component {
 	// add a note to the screen
 	onAddNoteClick = () => {
 		this.props.addNote(this.state.title);
+	}
+
+	// if user presses enter in input field, add the note as if they pressed the button
+	// adapted from: https://www.w3schools.com/howto/howto_js_trigger_button_enter.asp
+	pressedEnter = (event) => {
+		if (event.keyCode === 13) {
+			this.onAddNoteClick();
+		}
 	}
 }

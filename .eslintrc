@@ -26,6 +26,7 @@
         "no-debugger": "warn",
         "indent": ["error", "tab"],
         "no-tabs": 0,
+        "no-mixed-spaces-and-tabs": 0,
         "react/jsx-uses-react": 2,
         "react/jsx-uses-vars": 2,
         "react/react-in-jsx-scope": 2,
@@ -44,7 +45,8 @@
             "everything-else"
           ]}],
         "react/jsx-indent-props": [2, "tab"],
-        "react/no-access-state-in-setstate": 0
+        "react/no-access-state-in-setstate": 0,
+        "react/no-unescaped-entities": 0
     },
     "plugins": [
         "react"
