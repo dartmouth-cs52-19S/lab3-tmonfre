@@ -20,3 +20,6 @@ I added an undo button that allows users to undo moves/edits to notes in real-ti
 
 ### Z Index
 When you click on a note to drag it around, it is automatically brought to the top z index level of the app. This ensures whenever you drag an app around, it is always on the top level.
+
+### Show User Editing Note
+When you hover over the lock icon on a note you didn't create, you can see who created it. If that user is currently editing the note, it will tell you they are editing it. I used [React Tooltip](https://github.com/wwayne/react-tooltip) for the hover effect.

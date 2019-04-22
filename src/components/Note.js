@@ -1,6 +1,7 @@
 import React from 'react';
 import Draggable from 'react-draggable';
 import marked from 'marked';
+import ReactTooltip from 'react-tooltip';
 
 export default class Note extends React.Component {
 	constructor(props) {
@@ -11,7 +12,7 @@ export default class Note extends React.Component {
 				x: this.props.note.x,
 				y: this.props.note.y,
 			},
-			isEditing: false,
+			isEditing: this.props.note.isEditing,
 			editTitle: this.props.note.title,
 			editText: this.props.note.text,
 			zIndex: this.props.note.zIndex,
@@ -118,22 +119,28 @@ export default class Note extends React.Component {
 					</div>
 				);
 			} else {
+				const dataTipValue = this.props.note.isEditing ? `Currently editing: ${this.props.note.displayName}` : `Created by: ${this.props.note.displayName}`;
 				return (
-					<i className="fas fa-lock" />
+					<div>
+						<i className="fas fa-lock" data-tip={dataTipValue} />
+						<ReactTooltip />
+					</div>
 				);
 			}
 		} else {
+			const dataTipValue = this.props.note.isEditing ? `Currently editing: ${this.props.note.displayName}` : `Created by: ${this.props.note.displayName}`;
 			return (
-				<i className="fas fa-lock" />
+				<div>
+					<i className="fas fa-lock" data-tip={dataTipValue} />
+					<ReactTooltip />
+				</div>
 			);
 		}
 	}
 
 	onEditClick = () => {
-		const { isEditing } = this.state;
-
 		// clear out changes if they didn't want to save (i.e. was editing and requested to stop)
-		if (isEditing) {
+		if (this.state.isEditing) {
 			this.setState({
 				editTitle: this.props.note.title,
 				editText: this.props.note.text,
@@ -141,9 +148,7 @@ export default class Note extends React.Component {
 		}
 
 		// swap editing states
-		this.setState({
-			isEditing: !isEditing,
-		});
+		this.props.setNoteEditingState(this.props.note.id, !this.state.isEditing);
 	}
 
 	// update note content and render note
@@ -152,6 +157,8 @@ export default class Note extends React.Component {
 		this.setState({
 			isEditing: false,
 		});
+
+		this.props.setNoteEditingState(this.props.note.id, false);
 	}
 
 	updateEditText = (e) => {

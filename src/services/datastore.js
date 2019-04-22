@@ -124,6 +124,12 @@ function signOut() {
 	});
 }
 
+function setNoteEditingState(id, isEditing) {
+	database.ref(`notes/${id}`).update({
+		isEditing,
+	});
+}
+
 export {
-	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition, resetNotes, signIn, signUp, signOut, getCurrentUser, signInWithGoogle,
+	fetchNotes, addNote, deleteNote, updateNoteContent, updateNotePosition, resetNotes, signIn, signUp, signOut, getCurrentUser, signInWithGoogle, setNoteEditingState,
 };

@@ -80,6 +80,7 @@ class App extends React.Component {
 					updateNotePosition={db.updateNotePosition}
 					getTopZIndex={this.getTopZIndex}
 					user={this.state.user}
+					setNoteEditingState={db.setNoteEditingState}
 				/>
 			);
 		});
@@ -131,6 +132,8 @@ class App extends React.Component {
 			y: Math.floor(Math.random() * Math.floor(window.innerHeight / 4)),
 			zIndex: this.getTopZIndex(this.state.maxZIndex),
 			userID: this.state.user.uid,
+			displayName: this.state.user.displayName || this.state.user.email,
+			isEditing: false,
 		};
 
 		db.addNote(note);
