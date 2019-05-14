@@ -15,7 +15,6 @@ export default class InsertNote extends React.Component {
 				<input type="text" value={this.state.title} onChange={this.onInputChange} onClick={this.selectText} onKeyUp={this.pressedEnter} />
 				<div>
 					<button onClick={this.onAddNoteClick} type="submit">Add Note</button>
-					<i className="fas fa-undo-alt" onClick={this.props.undoChanges} role="button" tabIndex={0} />
 				</div>
 			</div>
 		);

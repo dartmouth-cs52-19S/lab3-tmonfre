@@ -1,13 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Map, Stack } from 'immutable';
+import { Map } from 'immutable';
+import io from 'socket.io-client';
+
 import InsertNote from './components/InsertNote';
 import Note from './components/Note';
-import User from './components/User';
-import SignIn from './components/SignIn';
 import './style.scss';
 
-import * as db from './services/datastore';
+// const socketserver = 'http://localhost:9090';
+const socketserver = 'https://cs52-websockets.herokuapp.com/';
 
 class App extends React.Component {
 	constructor(props) {
@@ -15,21 +16,22 @@ class App extends React.Component {
 
 		this.state = {
 			notes: new Map(),
-			undoStack: new Stack(),
 			maxZIndex: 0,
-			signIn: false,
-			user: db.getCurrentUser(),
 		};
+
+		this.socket = io(socketserver);
+		this.socket.on('connect', () => { console.log('socket.io connected'); });
+		this.socket.on('disconnect', () => { console.log('socket.io disconnected'); });
+		this.socket.on('reconnect', () => { console.log('socket.io reconnected'); });
+		this.socket.on('error', (error) => { console.log(error); });
 	}
 
 	// grab notes from firebase and store in state
 	componentDidMount() {
-		db.fetchNotes((notes) => {
+		this.socket.on('notes', (notes) => {
 			// push old state to stack and clear notes
 			this.setState({
-				undoStack: this.state.undoStack.push(this.state),
 				notes: new Map(),
-				user: db.getCurrentUser(),
 			}, () => {
 				// maximum zIndex in the collection
 				let max = this.state.maxZIndex;
@@ -57,10 +59,10 @@ class App extends React.Component {
 		return (
 			<div>
 				<div id="user-area">
-					{this.state.signIn ? <SignIn closeModal={this.requestSignIn} setUser={this.setUser} /> : null}
-					<User user={this.state.user} setUser={this.setUser} signIn={this.requestSignIn} signOut={this.requestSignOut} />
+					<h1>Welcome to React Notes!</h1>
+					<p>Click on the note titles to drag them around, and insert new notes below.</p>
 				</div>
-				{this.state.user ? <InsertNote addNote={this.addNote} undoChanges={this.undoChanges} /> : null }
+				<InsertNote addNote={this.addNote} />
 				<div id="notes-area">
 					{this.displayNotes()}
 				</div>
@@ -75,52 +77,25 @@ class App extends React.Component {
 				<Note
 					key={id}
 					note={note}
-					deleteNote={db.deleteNote}
-					updateNoteContent={db.updateNoteContent}
-					updateNotePosition={db.updateNotePosition}
+					deleteNote={this.deleteNote}
+					updateNoteContent={this.updateNoteContent}
+					updateNotePosition={this.updateNotePosition}
 					getTopZIndex={this.getTopZIndex}
-					user={this.state.user}
-					setNoteEditingState={db.setNoteEditingState}
 				/>
 			);
 		});
 	}
 
-	setUser = (user) => {
-		this.setState({
-			user,
-		});
+	deleteNote = (id) => {
+		this.socket.emit('deleteNote', id);
 	}
 
-	requestSignIn = () => {
-		this.setState({
-			signIn: !this.state.signIn,
-		});
+	updateNoteContent = (id, text, title) => {
+		this.socket.emit('updateNote', id, { text, title });
 	}
 
-	requestSignOut = () => {
-		db.signOut()
-			.then(() => {
-				this.setState({
-					user: null,
-					signIn: false,
-				});
-			});
-	}
-
-	// pop from the stack, and return user to previous state
-	undoChanges = () => {
-		const prevState = this.state.undoStack.pop();
-
-		// as long as there is something to pop
-		if (prevState._head) {
-			// update the stack then reset the notes in firebase
-			this.setState({
-				undoStack: prevState._head.value.undoStack,
-			}, () => {
-				db.resetNotes(prevState._head.value.notes);
-			});
-		}
+	updateNotePosition = (id, x, y, zIndex) => {
+		this.socket.emit('updateNote', id, { x, y, zIndex });
 	}
 
 	// add a note to the screen and pick random location in user view to start with
@@ -131,12 +106,9 @@ class App extends React.Component {
 			x: Math.floor(Math.random() * Math.floor(window.innerWidth / 4)),
 			y: Math.floor(Math.random() * Math.floor(window.innerHeight / 4)),
 			zIndex: this.getTopZIndex(this.state.maxZIndex),
-			userID: this.state.user.uid,
-			displayName: this.state.user.displayName || this.state.user.email,
-			isEditing: false,
 		};
 
-		db.addNote(note);
+		this.socket.emit('createNote', note);
 	}
 
 	// returns a new z index integer that places the attached note above all others
